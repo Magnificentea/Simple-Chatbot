@@ -1,26 +1,52 @@
 import os
+import sys
+import traceback
+from pathlib import Path
+from dotenv import load_dotenv
 from google import genai
 
-# Ersetze DEIN_GEMINI_API_KEY durch deinen echten Key
-client = genai.Client(api_key="AQ.Ab8RN6LB1U2gYXQBj0Dk8-0F6KO4_PrP3-MVqJKw5G0HorJWEw")
+if hasattr(sys, 'frozen'):
+    base_dir = Path(sys.executable).parent
+elif '__file__' in globals() and __file__:
+    base_dir = Path(__file__).resolve().parent
+else:
+    base_dir = Path.cwd()
 
-# Erstelle ein Chat-Objekt (merkt sich den Gesprächsverlauf)
-chat = client.chats.create(model="gemini-3.6-flash")
+env_path = base_dir / ".env"
 
-if __name__ == "__main__":
+# Lädt die .env aus dem Ordner
+load_dotenv(dotenv_path=env_path)
+
+try:
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError(
+            f"KEIN API-KEY GEFUNDEN!\nGesuchter Pfad: {env_path}\nBitte prüfe, ob die .env-Datei dort liegt und 'GEMINI_API_KEY=DeinKey' enthält."
+        )
+
+    client = genai.Client(api_key=api_key)
+    chat = client.chats.create(model="gemini-3.6-flash")
+
     print("Chatbot gestartet! Tippe 'tschüss' zum Beenden.\n")
 
     while True:
         user_input = input("Du: ")
 
         if user_input.lower() in ["verlassen", "auf wiedersehen", "tschüss", "exit"]:
+            print("")
             print("Buraks Chatbot: Auf Wiedersehen!")
             break
 
         if not user_input.strip():
             continue
 
-        # Nachricht über den Chat senden
         response = chat.send_message(user_input)
+        print("")
         print(f"Buraks Chatbot: {response.text}\n")
-input("\nDrücke Enter zum Beenden...")
+
+except Exception as e:
+    print(f"\nEs ist ein Fehler aufgetreten:\n{e}")
+    traceback.print_exc()
+
+finally:
+    input("\nDrücke Enter, um das Fenster zu schließen...")
