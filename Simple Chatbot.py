@@ -23,3 +23,4 @@ if __name__ == "__main__":
         # Nachricht über den Chat senden
         response = chat.send_message(user_input)
         print(f"Buraks Chatbot: {response.text}\n")
+input("\nDrücke Enter zum Beenden...")
