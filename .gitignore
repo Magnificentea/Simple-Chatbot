@@ -1,0 +1,8 @@
+# Sensitive files
+.env
+*.env
+
+# PyInstaller / Build output
+build/
+dist/
+*.spec
